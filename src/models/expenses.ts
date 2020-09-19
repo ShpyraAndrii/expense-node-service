@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IExpense extends mongoose.Document {
+export interface IExpense extends Document {
     date: number;
     sum: number;
     description: string;
@@ -8,7 +8,7 @@ export interface IExpense extends mongoose.Document {
     currency: string;
 }
 
-const ExpenseSchema = new mongoose.Schema({
+const ExpenseSchema = new Schema({
     date: {
         type: Number,
         required: true,

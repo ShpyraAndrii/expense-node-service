@@ -1,10 +1,14 @@
 import { Request, Response } from 'express';
-
 import { Expenses, IExpense } from '../models/expenses';
+import { retrieveLatestCurrencyRates } from './currencies';
 
 interface TotalSum {
     usd: number;
     uah: number;
+}
+
+interface CategoriesSum {
+    [key: string]: number;
 }
 
 const currencyes = {
@@ -25,12 +29,24 @@ function getTotalSum(expenses: IExpense[]): TotalSum {
     }, sum);
 }
 
-export function getAllExpenses(req: Request, res: Response) {
+function getCategoriesSums(expenses: IExpense[]): CategoriesSum {
+    const categoriesSum: CategoriesSum = {};
+    return expenses.reduce((acc, expense) => {
+        acc[expense.category] = expense.sum + (acc[expense.category] || 0);
+        return acc;
+    }, categoriesSum);
+}
+
+export async function getAllExpenses(req: Request, res: Response) {
     Expenses.find()
         .then((expenses) => {
             if (expenses.length) {
                 res.status(200);
-                res.json({ expenses, sum: getTotalSum(expenses) });
+                res.json({
+                    list: expenses,
+                    sum: getTotalSum(expenses),
+                    categoriesSum: getCategoriesSums(expenses),
+                });
             } else {
                 res.status(204);
                 res.json({ message: 'No data available' });
